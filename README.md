@@ -1,8 +1,14 @@
-# Dep-Sentry 🛡️
+# Dependency-Sentry 🛡️
 
-[![npm version](https://badge.fury.io/js/dep-sentry.svg)](https://badge.fury.io/js/dep-sentry)
+[![npm version](https://badge.fury.io/js/dependency-sentry.svg)](https://badge.fury.io/js/dependency-sentry)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
+
+> A powerful dependency checker and updater for Node.js projects that helps you keep your dependencies up-to-date and secure.
+
+## Repository
+
+📁 **GitHub**: https://github.com/ez0000001000000/dependency-sentry
 
 > A powerful dependency checker and updater for Node.js projects that helps you keep your dependencies up-to-date and secure.
 
