@@ -36,13 +36,13 @@
     }
   },
   "dependencies": {
-    "chalk": "^4.1.2",
-    "commander": "^9.0.0",
-    "inquirer": "^8.2.0",
-    "node-fetch": "^2.6.7",
-    "ora": "^6.1.0",
-    "semver": "^7.3.7",
-    "yargs": "^17.3.1"
+    "chalk": "4.1.2",
+    "commander": "^14.0.2",
+    "inquirer": "8.2.0",
+    "node-fetch": "2.6.7",
+    "ora": "^9.0.0",
+    "semver": "^7.7.3",
+    "yargs": "^18.0.0"
   },
   "devDependencies": {
     "eslint": "^8.11.0",
