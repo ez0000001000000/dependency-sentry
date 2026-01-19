@@ -61,7 +61,7 @@ async function main() {
           type: 'confirm',
           name: 'update',
           message: 'Would you like to update outdated dependencies?',
-          default: true
+          default: false
         }]);
         
         if (update) {
@@ -139,7 +139,7 @@ function getSeverityColor(severity) {
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err) => {
-  console.error('\n' + chalk.red('Unhandled rejection:'), err);
+  console.error('\nUnhandled rejection:', err);
   process.exit(1);
 });
 
