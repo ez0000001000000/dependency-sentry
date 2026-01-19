@@ -4,8 +4,8 @@
   "description": "A powerful dependency checker and updater for Node.js projects",
   "main": "src/index.js",
   "bin": {
-    "dependency-sentry": "./src/cli.js",
-    "dep-check": "./src/cli.js"
+    "dependency-sentry": "src/cli.js",
+    "dep-check": "src/cli.js"
   },
   "scripts": {
     "dep-check": "node src/cli.js",
@@ -26,10 +26,14 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ez0000001000000/dependency-sentry.git"
+    "url": "git+https://github.com/ez0000001000000/dependency-sentry.git"
   },
   "bugs": {
-    "url": "https://github.com/ez0000001000000/dependency-sentry/issues"
+    "url": "https://github.com/ez0000001000000/dependency-sentry/issues",
+    "downloads": {
+      "week": "https://api.npmjs.org/downloads/point/last-week/dependency-sentry",
+      "month": "https://api.npmjs.org/downloads/point/last-month/dependency-sentry"
+    }
   },
   "dependencies": {
     "chalk": "^5.6.2",
