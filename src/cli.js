@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
-const { program } = require('commander');
-const chalk = require('chalk');
-const ora = require('ora').default;
-const inquirer = require('inquirer');
-const { checkDependencies } = require('./checker');
-const { checkVulnerabilities } = require('./security');
-const { updateDependencies } = require('./updater');
+import { program } from 'commander';
+import chalk from 'chalk';
+import ora from 'ora';
+import inquirer from 'inquirer';
+import { checkDependencies } from './checker.js';
+import { checkVulnerabilities } from './security.js';
+import { updateDependencies } from './updater.js';
 
 program
   .name('dep-sentry')
@@ -65,7 +65,7 @@ async function main() {
         }]);
         
         if (update) {
-          await updateDependencies(outdated);
+          await updateDependencies(outdated, { dev: true, peer: true });
         }
       }
     } else {
@@ -144,6 +144,4 @@ process.on('unhandledRejection', (err) => {
 });
 
 // Run the CLI
-if (require.main === module) {
-  main();
-}
+main();

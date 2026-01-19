@@ -1,13 +1,14 @@
-const { execSync } = require('child_process');
-const fs = require('fs');
-const path = require('path');
-const { promisify } = require('util');
+import { execSync } from 'child_process';
+import fs from 'fs';
+import path from 'path';
+import { promisify } from 'util';
+import inquirer from 'inquirer';
+import chalk from 'chalk';
+import { detectPackageManager } from './checker.js';
+import semver from 'semver';
+
 const readFile = promisify(fs.readFile);
 const writeFile = promisify(fs.writeFile);
-const inquirer = require('inquirer');
-const chalk = require('chalk');
-const { detectPackageManager } = require('./checker');
-const semver = require('semver');
 
 /**
  * Updates the specified dependencies
@@ -155,6 +156,6 @@ function getVersionPrefix(version) {
   return match ? match[0] : '';
 }
 
-module.exports = {
+export {
   updateDependencies
 };

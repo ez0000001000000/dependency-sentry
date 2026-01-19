@@ -1,11 +1,12 @@
-const { execSync } = require('child_process');
-const fs = require('fs');
-const path = require('path');
-const semver = require('semver');
-const { promisify } = require('util');
+import { execSync } from 'child_process';
+import fs from 'fs';
+import path from 'path';
+import semver from 'semver';
+import { promisify } from 'util';
+import chalk from 'chalk';
+
 const readFile = promisify(fs.readFile);
 const access = promisify(fs.access);
-const chalk = require('chalk');
 
 /**
  * Checks for outdated dependencies in the project
@@ -110,7 +111,7 @@ function detectPackageManager() {
   return 'npm';
 }
 
-module.exports = {
+export {
   checkDependencies,
   detectPackageManager
 };

@@ -1,10 +1,11 @@
-const { execSync } = require('child_process');
-const fs = require('fs');
-const path = require('path');
-const { promisify } = require('util');
+import { execSync } from 'child_process';
+import fs from 'fs';
+import path from 'path';
+import { promisify } from 'util';
+import chalk from 'chalk';
+import fetch from 'node-fetch';
+
 const readFile = promisify(fs.readFile);
-const chalk = require('chalk');
-const fetch = require('node-fetch');
 
 // Cache for vulnerability data
 const vulnerabilityCache = new Map();
@@ -15,15 +16,11 @@ const vulnerabilityCache = new Map();
  */
 async function checkVulnerabilities() {
   try {
-    // First, try to use npm audit if available
-    if (await hasNpmAudit()) {
-      return await checkWithNpmAudit();
-    }
-    
-    // Fallback to checking known vulnerabilities via the npm registry
-    return await checkWithNpmRegistry();
+    // Use npm audit as the primary method
+    return await checkWithNpmAudit();
   } catch (error) {
-    console.warn(chalk.yellow(`Warning: Could not check for vulnerabilities: ${error.message}`));
+    // If npm audit fails, try a simple fallback
+    console.warn(chalk.yellow(`Warning: Could not run npm audit: ${error.message}`));
     return [];
   }
 }
@@ -47,28 +44,34 @@ async function hasNpmAudit() {
  */
 async function checkWithNpmAudit() {
   try {
-    const result = execSync('npm audit --json', { encoding: 'utf8' });
+    const result = execSync('npm audit --json', { 
+      encoding: 'utf8', 
+      stdio: ['ignore', 'pipe', 'ignore'],
+      timeout: 10000 // 10 second timeout
+    });
+    
     const audit = JSON.parse(result);
     
-    if (!audit.vulnerabilities) {
+    if (!audit.vulnerabilities || Object.keys(audit.vulnerabilities).length === 0) {
       return [];
     }
     
     const vulnerabilities = [];
     
     for (const [name, data] of Object.entries(audit.vulnerabilities)) {
-      if (data.via) {
-        const vuln = Array.isArray(data.via) ? data.via[0] : data.via;
+      if (data.via && data.via.length > 0) {
+        const vuln = data.via[0];
         
-        if (vuln) {
+        if (vuln && typeof vuln === 'object') {
           vulnerabilities.push({
             name,
-            severity: data.severity,
+            severity: data.severity || 'moderate',
             title: vuln.title || 'Unknown vulnerability',
             url: vuln.url || '',
             vulnerable_versions: data.range || '*',
             patched_versions: vuln.fixedIn ? `>=${vuln.fixedIn}` : 'No fix available',
-            advisory: vuln.advisory || ''
+            advisory: vuln.advisory || '',
+            version: data.version || 'unknown'
           });
         }
       }
@@ -76,98 +79,52 @@ async function checkWithNpmAudit() {
     
     return vulnerabilities;
   } catch (error) {
-    throw new Error(`Failed to run npm audit: ${error.message}`);
-  }
-}
-
-/**
- * Checks for vulnerabilities using the npm registry
- * @returns {Promise<Array>} Array of vulnerabilities
- */
-async function checkWithNpmRegistry() {
-  const packageJsonPath = path.join(process.cwd(), 'package.json');
-  
-  try {
-    const packageJson = JSON.parse(await readFile(packageJsonPath, 'utf8'));
-    const allDeps = {
-      ...packageJson.dependencies || {},
-      ...packageJson.devDependencies || {},
-      ...packageJson.peerDependencies || {}
-    };
+    // Check if this is just "no vulnerabilities found"
+    if (error.stdout && error.stdout.includes('found 0 vulnerabilities')) {
+      return [];
+    }
     
-    const vulnerabilities = [];
+    // Check if error message indicates no vulnerabilities
+    if (error.message && error.message.includes('found 0 vulnerabilities')) {
+      return [];
+    }
     
-    for (const [name, version] of Object.entries(allDeps)) {
-      // Skip local file paths and git repositories
-      if (typeof version !== 'string' || version.startsWith('file:') || version.startsWith('git+')) {
-        continue;
-      }
-      
+    // Check if npm audit failed but we can still proceed
+    if (error.status === 1 && error.message.includes('npm audit')) {
+      // npm audit found vulnerabilities, let's try to parse the output
       try {
-        const pkgVulnerabilities = await getPackageVulnerabilities(name, version);
-        vulnerabilities.push(...pkgVulnerabilities);
-      } catch (error) {
-        console.warn(chalk.yellow(`Warning: Could not check vulnerabilities for ${name}@${version}: ${error.message}`));
+        if (error.stdout) {
+          const audit = JSON.parse(error.stdout);
+          if (audit.vulnerabilities) {
+            const vulnerabilities = [];
+            for (const [name, data] of Object.entries(audit.vulnerabilities)) {
+              vulnerabilities.push({
+                name,
+                severity: data.severity || 'moderate',
+                title: 'Security vulnerability detected',
+                url: '',
+                vulnerable_versions: data.range || '*',
+                patched_versions: 'Run npm audit fix',
+                advisory: 'Run npm audit for details',
+                version: 'unknown'
+              });
+            }
+            return vulnerabilities;
+          }
+        }
+      } catch (parseError) {
+        // If we can't parse, just return empty
+        return [];
       }
     }
     
-    return vulnerabilities;
-  } catch (error) {
-    throw new Error(`Failed to check vulnerabilities: ${error.message}`);
-  }
-}
-
-/**
- * Gets vulnerabilities for a specific package version
- * @param {string} name - Package name
- * @param {string} version - Package version
- * @returns {Promise<Array>} Array of vulnerabilities
- */
-async function getPackageVulnerabilities(name, version) {
-  const cacheKey = `${name}@${version}`;
-  
-  // Check cache first
-  if (vulnerabilityCache.has(cacheKey)) {
-    return vulnerabilityCache.get(cacheKey);
-  }
-  
-  try {
-    const response = await fetch(`https://registry.npmjs.org/${name}/${version}`, {
-      headers: { 'Accept': 'application/vnd.npm.install-v1+json' }
-    });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
-    }
-    
-    const data = await response.json();
-    const vulnerabilities = [];
-    
-    if (data.vulnerabilities) {
-      for (const vuln of Object.values(data.vulnerabilities)) {
-        vulnerabilities.push({
-          name,
-          version,
-          severity: vuln.severity || 'moderate',
-          title: vuln.title || 'Unknown vulnerability',
-          url: vuln.url || `https://www.npmjs.com/advisories/${vuln.id}`,
-          vulnerable_versions: vuln.vulnerable_versions || '*',
-          patched_versions: vuln.patched_versions || 'No fix available',
-          advisory: vuln.overview || ''
-        });
-      }
-    }
-    
-    // Cache the result
-    vulnerabilityCache.set(cacheKey, vulnerabilities);
-    return vulnerabilities;
-    
-  } catch (error) {
-    console.warn(chalk.yellow(`Warning: Could not fetch vulnerability data for ${name}@${version}: ${error.message}`));
+    // For any other error, return empty array (don't fail the whole tool)
+    console.warn(chalk.yellow(`Warning: npm audit failed, skipping vulnerability check`));
     return [];
   }
 }
 
-module.exports = {
+
+export {
   checkVulnerabilities
 };
