@@ -1,6 +1,6 @@
 {
   "name": "dependency-sentry",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "A powerful dependency checker and updater for Node.js projects",
   "main": "src/index.js",
   "bin": {
