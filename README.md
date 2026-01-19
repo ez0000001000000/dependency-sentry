@@ -6,11 +6,34 @@
 
 > A powerful dependency checker and updater for Node.js projects that helps you keep your dependencies up-to-date and secure.
 
-## Repository
+## 📦 Installation
 
-📁 **GitHub**: https://github.com/ez0000001000000/dependency-sentry
+### Global Installation
+```bash
+npm install -g dependency-sentry
+# or
+yarn global add dependency-sentry
+# or
+pnpm add -g dependency-sentry
+```
 
-> A powerful dependency checker and updater for Node.js projects that helps you keep your dependencies up-to-date and secure.
+### Use with npx (no installation required)
+```bash
+npx dep-check
+```
+
+## 🚀 Quick Start
+
+Run `dep-check` in your project directory to check for outdated and vulnerable dependencies:
+
+```bash
+dep-check
+```
+
+## 📁 Repository
+
+📁 **GitHub**: https://github.com/ez0000001000000/dependency-sentry  
+📦 **npm**: https://www.npmjs.com/package/dependency-sentry
 
 ## Features ✨
 
@@ -37,23 +60,23 @@ pnpm add -g dep-sentry
 Or use it directly with `npx` without installation:
 
 ```bash
-npx dep-sentry
+npx dep-check
 ```
 
 ## Usage 🚀
 
 ### Basic Usage
 
-Run `dep-sentry` in your project directory to check for outdated and vulnerable dependencies:
+Run `dep-check` in your project directory to check for outdated and vulnerable dependencies:
 
 ```bash
-dep-sentry
+dep-check
 ```
 
 ### Options
 
 ```
-Usage: dep-sentry [options]
+Usage: dep-check [options]
 
 Options:
   -V, --version        output the version number
@@ -68,27 +91,43 @@ Options:
 
 Check for security vulnerabilities only:
 ```bash
-dep-sentry --security
+dep-check --security
 ```
 
 Check for outdated packages only:
 ```bash
-dep-sentry --outdated
+dep-check --outdated
 ```
 
 Update all outdated dependencies without prompts:
 ```bash
-dep-sentry --update
+dep-check --update
 ```
 
 Run in CI mode (non-interactive):
 ```bash
-dep-sentry --ci
+dep-check --ci
+```
+
+### As an npm script
+
+Add to your package.json:
+```json
+{
+  "scripts": {
+    "check-deps": "dep-check"
+  }
+}
+```
+
+Then run:
+```bash
+npm run check-deps
 ```
 
 ## CI/CD Integration 🔄
 
-You can integrate `dep-sentry` into your CI/CD pipeline to fail builds when vulnerabilities are found:
+You can integrate `dep-check` into your CI/CD pipeline to fail builds when vulnerabilities are found:
 
 ```yaml
 # .github/workflows/security-check.yml
@@ -108,7 +147,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Run security check
-        run: npx dep-sentry --ci
+        run: npx dep-check --ci
 ```
 
 ## Contributing 🤝
