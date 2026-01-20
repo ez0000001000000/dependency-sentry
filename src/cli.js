@@ -21,6 +21,14 @@ program.parse(process.argv);
 
 async function main() {
   const options = program.opts();
+
+  // Validate current working directory
+  const cwd = process.cwd();
+  if (!cwd || typeof cwd !== 'string') {
+    console.error(chalk.red('Error: Invalid working directory'));
+    process.exit(1);
+  }
+
   const spinner = ora('Analyzing project...').start();
 
   try {

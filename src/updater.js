@@ -21,8 +21,20 @@ const writeFile = promisify(fs.writeFile);
  */
 async function updateDependencies(outdated, options = {}) {
   const { auto = false, dev = false, peer = false } = options;
+  
+  // Validate current working directory
+  const cwd = process.cwd();
+  if (!cwd || typeof cwd !== 'string') {
+    throw new Error('Invalid working directory');
+  }
+  
   const packageManager = detectPackageManager();
-  const packageJsonPath = path.join(process.cwd(), 'package.json');
+  const packageJsonPath = path.join(cwd, 'package.json');
+  
+  // Validate package.json path
+  if (!packageJsonPath || typeof packageJsonPath !== 'string') {
+    throw new Error('Invalid package.json path');
+  }
   
   try {
     // Read package.json

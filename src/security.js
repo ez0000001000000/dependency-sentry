@@ -16,6 +16,13 @@ const vulnerabilityCache = new Map();
  */
 async function checkVulnerabilities() {
   try {
+    // Validate current working directory
+    const cwd = process.cwd();
+    if (!cwd || typeof cwd !== 'string') {
+      console.warn(chalk.yellow('Warning: Invalid working directory, skipping vulnerability check'));
+      return [];
+    }
+    
     // Use npm audit as the primary method
     return await checkWithNpmAudit();
   } catch (error) {

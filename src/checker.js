@@ -16,7 +16,11 @@ async function checkDependencies() {
   const packageJsonPath = path.join(process.cwd(), 'package.json');
   
   try {
-    // Check if package.json exists
+    // Check if package.json exists and is accessible
+    if (!packageJsonPath || typeof packageJsonPath !== 'string') {
+      throw new Error('Invalid package.json path');
+    }
+    
     await access(packageJsonPath, fs.constants.F_OK);
     
     // Read package.json
@@ -103,9 +107,17 @@ function getLatestVersion(packageName) {
  * @returns {string} Package manager (npm, yarn, or pnpm)
  */
 function detectPackageManager() {
-  if (fs.existsSync(path.join(process.cwd(), 'yarn.lock'))) {
+  const cwd = process.cwd();
+  
+  // Validate current working directory
+  if (!cwd || typeof cwd !== 'string') {
+    console.warn(chalk.yellow('Warning: Invalid working directory, defaulting to npm'));
+    return 'npm';
+  }
+  
+  if (fs.existsSync(path.join(cwd, 'yarn.lock'))) {
     return 'yarn';
-  } else if (fs.existsSync(path.join(process.cwd(), 'pnpm-lock.yaml'))) {
+  } else if (fs.existsSync(path.join(cwd, 'pnpm-lock.yaml'))) {
     return 'pnpm';
   }
   return 'npm';
