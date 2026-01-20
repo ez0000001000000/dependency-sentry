@@ -11,7 +11,9 @@
   "scripts": {
     "dep-check": "node src/cli.js",
     "start": "node src/cli.js",
-    "test": "jest",
+    "test": "set NODE_OPTIONS=--experimental-vm-modules && jest",
+    "test:watch": "set NODE_OPTIONS=--experimental-vm-modules && jest --watch",
+    "test:coverage": "set NODE_OPTIONS=--experimental-vm-modules && jest --coverage",
     "lint": "eslint ."
   },
   "keywords": [
@@ -46,6 +48,9 @@
     "yargs": "^18.0.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.28.6",
+    "@babel/preset-env": "^7.28.6",
+    "core-js": "^3.47.0",
     "eslint": "^9.39.2",
     "jest": "^30.2.0"
   },
